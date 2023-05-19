@@ -2,7 +2,8 @@ const { existRoute, absoluteRoute } = require('./route.js');
 const fs = require('fs');
 const userPath = process.argv[2];
 const path = require('path');
-const marked = require('marked');
+const { marked } = require('marked');
+const { load } = require('cheerio');
 
 // Función MD-Links
 const mdLinks = (userPath) => new Promise((resolve, reject) => {
@@ -14,15 +15,38 @@ const mdLinks = (userPath) => new Promise((resolve, reject) => {
   }
 });
 
+// Función para leer y procesar los archivos Markdown
+const processMarkdownFile = (filePath) => {
+  console.log(filePath)
+  fs.readFile(filePath, 'utf8',(error, markdownContent)=>{
+    if(error){
+      console.log(error)
+
+      return
+    }
+      const htmlContent = marked(markdownContent);
+      const htmlDom = load(htmlContent);
+      console.log(htmlDom);
+      // console.log(`Contenido HTML del archivo ${filePath}:`);
+      console.log(htmlContent);
+  })
+};
+
 mdLinks(userPath)
   .then((resolvePath) => {
-    console.log(`La ruta: ${resolvePath} es válida`);
+    // console.log(`La ruta: ${resolvePath} es válida`);
     const mdFiles = validateFileDirectory(resolvePath);
-    console.log('Archivos .md encontrados:', mdFiles);
+   //console.log('Archivos .md encontrados:', mdFiles);
+   for(let i=0; i< mdFiles.length; i++) {
+    processMarkdownFile(mdFiles[i])
+   // console.log(mdFiles[i])
+   }
   })
   .catch((error) => {
-    console.log(error);
+     console.log(error);
   });
+
+
 
 // Función validar si es archivo o directorio y muestra en array los .md
 const validateFileDirectory = (absoluteRoute) => {
@@ -42,8 +66,7 @@ const validateFileDirectory = (absoluteRoute) => {
   }
   return mdFiles;
 };
-// validateFileDirectory(absoluteRoute1);
 
 module.exports = {
-  mdLinks, validateFileDirectory,
+  mdLinks, validateFileDirectory, processMarkdownFile
 };

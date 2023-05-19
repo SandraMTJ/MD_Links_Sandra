@@ -4,7 +4,7 @@ const fs = require('fs');
 /* Verifica existencia de ruta */
 const existRoute = (userPath) => {
     if (fs.existsSync(userPath)){
-        console.log('La ruta existe')
+        // console.log('La ruta existe')
         return true;
     } 
         console.log('la ruta no existe')
