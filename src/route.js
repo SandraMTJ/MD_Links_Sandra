@@ -7,7 +7,7 @@ const existRoute = (userPath) => {
         // console.log('La ruta existe')
         return true;
     } 
-        console.log('la ruta no existe')
+        console.log('la ruta no existe');
         return false;
     
 };
@@ -15,7 +15,7 @@ const existRoute = (userPath) => {
 /* Verifica si es ruta absoluta, sino se convierte */
 const absoluteRoute = (userPath) => {
     if(path.isAbsolute(userPath)) {
-        return userPath
+        return userPath;
     } 
         return path.resolve(userPath);
     

@@ -1,69 +1,151 @@
-const { existRoute, absoluteRoute } = require('./route.js');
+const { existRoute } = require('./route.js');
 const fs = require('fs');
+const process = require('process');
 const userPath = process.argv[2];
-const absoluteRoute1 = 'D:/BOOTCAMP/MD_Links/MD_Links_Sandra/src/prueba/prueba.md'
-const mdFiles = [];
 const path = require('path');
+const { marked } = require('marked');
+const jsdom = require('jsdom');
+const { JSDOM } = jsdom;
 
+// Función validar si es archivo o directorio y muestra en array los .md
+const validateFileDirectory = (absoluteRoute) => {
+  let mdFiles = [];
+  if (fs.lstatSync(absoluteRoute).isFile() && path.extname(absoluteRoute) === '.md') {
+    mdFiles.push(absoluteRoute);
+  }
+  if (fs.lstatSync(absoluteRoute).isDirectory()) {
+    const routesArray = fs.readdirSync(absoluteRoute);
+    routesArray.forEach((rt) => {
+      const pathNew = path.join(absoluteRoute, rt);
+      mdFiles = mdFiles.concat(validateFileDirectory(pathNew));
+    });
+  }
+  return mdFiles;
+};
 
-/* Recibe una ruta de usuario como entrada. Crea una promesa que verifica si la ruta existe utilizando la función 'existRoute'. 
-Si la ruta existe, utiliza la función 'absoluteRoute' para obtener la ruta absoluta y luego resuelve la promesa con la ruta absoluta. 
-Si la ruta no existe, rechaza la promesa con el mensaje de error "Error". */
-const mdLinks = (userPath) => {
+// Función para leer y procesar los archivos Markdown
+const processMarkdownFile = (filePath) => {
   return new Promise((resolve, reject) => {
-    if (existRoute(userPath)) {
-      const resolvedPath = absoluteRoute(userPath);
-      resolve(resolvedPath);
-    } else { 
-      reject('Error')
+    fs.readFile(filePath, 'utf8', (error, markdownContent) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      const htmlContent = marked(markdownContent, { headerIds: false, mangle: false });
+      const dom = new JSDOM(htmlContent);
+      const linksA = dom.window.document.querySelectorAll('a');
+      const arrayElements = [];
+      linksA.forEach((links) => {
+        const objectsElements = {
+          href: links.href,
+          text: links.textContent,
+          file: filePath
+        };
+        arrayElements.push(objectsElements);
+      });
+      resolve(arrayElements);
+    });
+  });
+};
+
+const getAllLinks = (mdFiles) => {
+  const arrayAllLinks = mdFiles.map((file) => {
+    return processMarkdownFile(file);
+  });
+  return Promise.all(arrayAllLinks);
+};
+
+const validateLinks = (links) => {
+  // Implementa la validación de los enlaces aquí
+  // Retorna los enlaces validados
+};
+
+const getStatistics = (links) => {
+  // Implementa el cálculo de estadísticas aquí
+  // Retorna las estadísticas
+};
+
+const mdLinks = (userPath, validate = false, stats = false) => {
+  return new Promise((resolve, reject) => {
+    if (!existRoute(userPath)) {
+      reject(new Error('Error, la ruta no existe'));
+    } else {
+      const arrayFiles = validateFileDirectory(userPath);
+      if (validate && stats) {
+        getAllLinks(arrayFiles)
+          .then((res) => {
+            const validatedLinks = validateLinks(res);
+            const statistics = getStatistics(validatedLinks);
+            resolve(statistics);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      } else if (validate) {
+        getAllLinks(arrayFiles)
+          .then((res) => {
+            const validatedLinks = validateLinks(res);
+            resolve(validatedLinks);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      } else if (stats) {
+        getAllLinks(arrayFiles)
+          .then((res) => {
+            const statistics = getStatistics(res);
+            resolve(statistics);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      } else {
+        getAllLinks(arrayFiles)
+          .then((res) => {
+            resolve(res.flat());
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      }
     }
   });
 };
 
-/* Se llama a la función mdLinks con la variable 'userPath' como argumento. Luego se encadenan los métodos 'then' y 'catch' para manejar el resultado de la promesa. 
-Si la promesa se resuelve, se imprime "Es válida la ruta: [ruta]" donde [ruta] es la ruta absoluta resuelta. Si la promesa es rechazada, se imprime el mensaje de error. */
-mdLinks(userPath)
-  .then((resolvePath) => {
-    console.log(`Es válida La ruta: ${resolvePath}`);
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+const args = process.argv.slice(2);
+const userPath1 = args[0];
 
-  const extractMDFiles = (directory) => {
-    const files = fs.readdirSync(directory);
-    files.forEach((file) => {
-      const filePath = path.join(directory, file);
-      if (fs.lstatSync(filePath).isFile() && path.extname(filePath) === '.md') {
-        mdFiles.push(filePath);
-        // Aquí puedes hacer lo que necesites con el archivo MD
-      } else if (fs.lstatSync(filePath).isDirectory()) {
-        extractMDFiles(filePath);
-      }
+if (args.includes('--validate') && args.includes('--stats')) {
+  mdLinks(userPath1, true, true)
+    .then((result) => {
+      console.log(result);
+    })
+    .catch((error) => {
+      console.error(error);
     });
-     
-  };
-
-/* Toma una ruta absoluta como entrada. Utiliza 'fs.lstatSync' para verificar si la ruta es un archivo o un directorio. Si es un archivo, imprime "Es un archivo". 
-Si es un directorio, imprime "Es un directorio". Si la ruta no existe, imprime "No existe". */  
-const validateFileDirectory = (absoluteRoute) => {
-  if (fs.lstatSync(absoluteRoute).isFile()) {
-    console.log('Es un archivo');
-    // Aquí puedes hacer lo que necesites con el archivo
-  } else if (fs.lstatSync(absoluteRoute).isDirectory()) {
-    console.log('Es un directorio');
-    extractMDFiles(absoluteRoute);
-    console.log('Archivos .md encontrados:');
-    mdFiles.forEach((filePath) => {
-      console.log(filePath);
+} else if (args.includes('--validate')) {
+  mdLinks(userPath1, true)
+    .then((result) => {
+      console.log(result);
+    })
+    .catch((error) => {
+      console.error(error);
     });
-  } else {
-    console.log('No existe');
-  }
-};
+} else if (args.includes('--stats')) {
+  mdLinks(userPath1, false, true)
+    .then((result) => {
+      console.log(result);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+} else {
+  mdLinks(userPath1)
+    .then((result) => {
+      console.log(result);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
 
-//return mdFiles;
-// extractMDFiles(mdFiles);
- //validateFileDirectory(absoluteRoute1);
-  
-module.exports = { mdLinks,  validateFileDirectory, mdFiles }
