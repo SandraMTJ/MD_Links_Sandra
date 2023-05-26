@@ -1,13 +1,10 @@
 const { existRoute } = require('./route.js');
 const fs = require('fs');
-const process = require('process');
-const userPath = process.argv[2];
-//const options = process.argv[3];
 const path = require('path');
 const { marked } = require('marked');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
-//const fetch = require('node-fetch');
+const fetch = require('node-fetch');
 
 // Función validar si es archivo o directorio y muestra en array los .md
 const validateFileDirectory = (absoluteRoute) => {
@@ -28,20 +25,61 @@ const validateFileDirectory = (absoluteRoute) => {
   return mdFiles;
 };
 
+const validate = (mdFiles) => {
+  return new Promise((resolve) => {
+    let fetchElement = mdFiles.map((element) => {
+      return fetch(element.href)
+        .then((res) => {
+          element.status = res.status;
+          element.message = res.statusText;
+          //return element;
+        })
+        .catch((err) => {
+           element.status = err;
+          // element.message = err.message;
+          //return element;
+        });
+    });
+    return Promise.all (fetchElement).then(() =>{
+      resolve (mdFiles);
+    });
+  });
+};
+
+
 // Función MD-Links
-const mdLinks = (userPath) => {
+const mdLinks = (userPath, options) => {
   return new Promise((resolve, reject) => {
     if (!existRoute(userPath)) {
       reject(new Error('Error, la ruta no existe'));
-    } else { 
+    } else if (options.validate) {
       const arrayFiles = validateFileDirectory(userPath);
       getAllLinks(arrayFiles)
-      .then((res) => {
-        resolve(res.flat());
-      });
+        .then((links) => {
+          validate(links.flat())
+            .then((validatedLinks) => {
+              resolve(validatedLinks);
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    } else {
+      const arrayFiles = validateFileDirectory(userPath);
+      getAllLinks(arrayFiles)
+        .then((links) => {
+          resolve(links.flat());
+        })
+        .catch((error) => {
+          reject(error);
+        });
     }
   });
 };
+
 
 // Función para leer y procesar los archivos Markdown
 const processMarkdownFile = (filePath) => {
@@ -79,16 +117,8 @@ const getAllLinks = (mdFiles) => {
   return Promise.all(arrayAllLinks);
 };
 
-mdLinks(userPath)
-  .then((result) => {
-    console.log('Array de Objetos:', result);
-  })
-  .catch((error) => {
-    // console.log(error);
-    // console.log(`Error: ${error}`);
-    return error;
-  });
+
 
 module.exports = {
-  mdLinks, validateFileDirectory, processMarkdownFile, getAllLinks
+  mdLinks, validateFileDirectory, processMarkdownFile, getAllLinks, validate
 };
