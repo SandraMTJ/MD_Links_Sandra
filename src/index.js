@@ -1,49 +1,64 @@
-const { existRoute, absoluteRoute } = require('./route.js');
-const fs = require('fs');
-const userPath = process.argv[2];
-const path = require('path');
-const marked = require('marked');
+const { validateFileDirectory, validate, getAllLinks, stats, statsBroken } = require('./functions.js');
+const { existRoute } = require('./route.js');
 
 // Función MD-Links
-const mdLinks = (userPath) => new Promise((resolve, reject) => {
-  if (existRoute(userPath)) {
-    const resolvedPath = absoluteRoute(userPath);
-    resolve(resolvedPath);
-  } else {
-    reject('Error');
-  }
-});
-
-mdLinks(userPath)
-  .then((resolvePath) => {
-    console.log(`La ruta: ${resolvePath} es válida`);
-    const mdFiles = validateFileDirectory(resolvePath);
-    console.log('Archivos .md encontrados:', mdFiles);
-  })
-  .catch((error) => {
-    console.log(error);
+const mdLinks = (userPath, options) => {
+  return new Promise((resolve, reject) => {
+    if (!existRoute(userPath)) {
+      reject(new Error('Error, la ruta no existe'));
+    } else if (options.validate === true && options.stats === false) {
+      const arrayFiles = validateFileDirectory(userPath);
+      getAllLinks(arrayFiles)
+        .then((links) => {
+          validate(links.flat())
+            .then((validatedLinks) => {
+              if(options.stats){
+                resolve(stats(validatedLinks));
+              } else {
+                resolve(validatedLinks);
+              }
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    } else if (options.validate === true && options.stats === true) {
+      const arrayFiles = validateFileDirectory(userPath);
+      getAllLinks(arrayFiles)
+        .then((links) => {
+          validate(links.flat())
+            .then((validatedLinks) => {
+              if(options.stats){
+                resolve(statsBroken(validatedLinks));
+              } else {
+                resolve(validatedLinks);
+              }
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    } else {
+      const arrayFiles = validateFileDirectory(userPath);
+      getAllLinks(arrayFiles)
+        .then((links) => {
+          if (options.stats){
+            resolve(stats(links.flat()));
+          } else {
+            resolve(links.flat());
+          }  
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    }
   });
-
-// Función validar si es archivo o directorio y muestra en array los .md
-const validateFileDirectory = (absoluteRoute) => {
-  let mdFiles = [];
-  if (fs.lstatSync(absoluteRoute).isFile() && path.extname(absoluteRoute) === '.md') {
-    mdFiles.push(absoluteRoute);
-    // return console.log('Es un archivo');
-  }
-  if (fs.lstatSync(absoluteRoute).isDirectory()) {
-    const routesArray = fs.readdirSync(absoluteRoute);
-    routesArray.forEach((rt) => {
-      const pathNew = path.join(absoluteRoute, rt);
-      mdFiles = mdFiles.concat(validateFileDirectory(pathNew));
-    });
-  } else {
-
-  }
-  return mdFiles;
 };
-// validateFileDirectory(absoluteRoute1);
 
-module.exports = {
-  mdLinks, validateFileDirectory,
-};
+module.exports = { mdLinks };
