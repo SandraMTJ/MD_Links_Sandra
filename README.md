@@ -5,8 +5,9 @@
 * [1. Preámbulo](#1-preámbulo)
 * [2. Resumen del proyecto](#2-resumen-del-proyecto)
 * [3. Descripción del proyecto](#3-descripción-del-proyecto)
-* [4. Desplegado en NPM](#4-desplegado-en-npm)
-* [5. Checklist](#5-checklist)
+* [4. Checklist](#4-checklist)
+* [5. Desplegado en NPM](#5-desplegado-en-npm)
+
 
 ***
 
@@ -105,11 +106,7 @@ incluyendo el listado de links rotos.
 
 ![StatsValidate](./src/img/validatestats.jpg)
 
-## 4. Desplegado en NPM
-
-[ejemplo](https://github.com/SandraMTJ/MD_Links_Sandra)
-
-## 5. Checklist
+## 4. Checklist
 
 ### General
 
@@ -140,3 +137,7 @@ incluyendo el listado de links rotos.
 * [:ballot_box_with_check:] Pruebas unitarias cubren un mínimo del 70% de statements, functions,
   lines, y branches.
 * [:ballot_box_with_check:] Pasa tests (y linters) (`npm test`).
+
+## 5. Desplegado en NPM
+
+[NPM](https://github.com/SandraMTJ/MD_Links_Sandra)
