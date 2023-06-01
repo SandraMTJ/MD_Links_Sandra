@@ -35,7 +35,12 @@ reportando estadísticas si son válidos, únicos o están rotos. Utilizando Nod
 ## 3. Descripción del proyecto
 
 ### Diagrama de flujo
+
 ![Diagrama](./src/img/Diagrama.png)
+
+### Planeación
+
+[Github Projects](https://github.com/users/SandraMTJ/projects/2)
 
 ### Especificaciones técnicas
 
