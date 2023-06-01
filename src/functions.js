@@ -33,11 +33,11 @@ const validate = (mdFiles) => {
           element.message = res.statusText;
         })
         .catch((err) => {
-          element.status = 'Not Found'; // Cambio aquí
+          element.status = 'Not Found';
         });
     });
     return Promise.all(fetchElement).then(() => {
-      resolve(mdFiles); // Cambio aquí para resolver con mdFiles en lugar de validatedLinks
+      resolve(mdFiles); 
     });
   });
 };
@@ -70,6 +70,7 @@ const processMarkdownFile = (filePath) => {
   });
 };
 
+// Función donde se obtienen los enlaces
 const getAllLinks = (mdFiles) => {
   const arrayAllLinks = mdFiles.map((file) => {
     return processMarkdownFile(file);
@@ -77,6 +78,7 @@ const getAllLinks = (mdFiles) => {
   return Promise.all(arrayAllLinks);
 };
 
+// Devuelve un objeto que proporciona información sobre cantidad total de enlaces y la cantidad de enlaces únicos en el array de objetos proporcionado
 const stats = (arrayObjetcs) => {
   let uniqueSet = new Set(arrayObjetcs.map((link) => link.href)).size;
   return {
@@ -85,6 +87,7 @@ const stats = (arrayObjetcs) => {
   };
 };
 
+// Devuelve un objeto que proporciona información sobre cantidad total de enlaces, la cantidad de enlaces únicos y enlaces rotos en el array de objetos proporcionado
 const statsBroken = (arrayObjetcs) => {
   let uniqueSet = new Set(arrayObjetcs.map((link) => link.href)).size;
   return {

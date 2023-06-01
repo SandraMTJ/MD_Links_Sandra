@@ -7,6 +7,8 @@ let objOptions = { validate: false, stats: false };
 const options = process.argv;
 const colors = require('colors');
 
+// Condiciones para determinar valores de las propiedades validate y stats del objeto objOptions en función de los argumentos de la línea de comandos.
+
   if(options.includes('--validate') && (!options.includes('--stats'))){
     objOptions.validate = true;
   } else if(!options.includes('--validate') && (options.includes('--stats'))){
@@ -19,6 +21,7 @@ const colors = require('colors');
     objOptions.stats = false;
   }
 
+  // Ejecución de función mdLinks
   mdLinks(userPath, objOptions)
   .then((result) => {
     if (objOptions.stats === true) {
@@ -42,4 +45,3 @@ const colors = require('colors');
   .catch((error) => {
     return error;
   });
-

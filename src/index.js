@@ -2,7 +2,6 @@ const { validateFileDirectory, validate, getAllLinks, stats, statsBroken } = req
 const { existRoute, absoluteRoute } = require('./route.js');
 
 // Función MD-Links
-
 const mdLinks = (userPath, options) => {
   const route = absoluteRoute(userPath);
   return new Promise((resolve, reject) => {
@@ -22,7 +21,6 @@ const mdLinks = (userPath, options) => {
       getAllLinks(arrayFiles)
       .then((res) => {
         resolve(res.flat());
-        // console.log(getAllLinks);
       });
       }
   });
