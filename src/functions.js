@@ -33,20 +33,19 @@ const validate = (mdFiles) => {
           element.message = res.statusText;
         })
         .catch((err) => {
-          element.status = 'Not Found'; // Cambio aquí
+          element.status = 'Not Found';
         });
     });
     return Promise.all(fetchElement).then(() => {
-      resolve(mdFiles); // Cambio aquí para resolver con mdFiles en lugar de validatedLinks
+      resolve(mdFiles); 
     });
   });
 };
 
-
 // Función para leer y procesar los archivos Markdown
 const processMarkdownFile = (filePath) => {
   return new Promise((resolve, reject) => {
-    console.log(filePath);
+    //console.log(filePath);
     fs.readFile(filePath, 'utf8', (error, markdownContent) => {
       if (error) {
         console.log(error);
@@ -60,7 +59,7 @@ const processMarkdownFile = (filePath) => {
       linksA.forEach((links) => {
         const objectsElements = {
           href: links.href,
-          text: links.textContent,
+          text: links.textContent.substring(0, 50),
           file: filePath
         };
         arrayElements.push(objectsElements);
@@ -71,7 +70,7 @@ const processMarkdownFile = (filePath) => {
   });
 };
 
-
+// Función donde se obtienen los enlaces
 const getAllLinks = (mdFiles) => {
   const arrayAllLinks = mdFiles.map((file) => {
     return processMarkdownFile(file);
@@ -79,15 +78,16 @@ const getAllLinks = (mdFiles) => {
   return Promise.all(arrayAllLinks);
 };
 
-
+// Devuelve un objeto que proporciona información sobre cantidad total de enlaces y la cantidad de enlaces únicos en el array de objetos proporcionado
 const stats = (arrayObjetcs) => {
   let uniqueSet = new Set(arrayObjetcs.map((link) => link.href)).size;
   return {
     Total: arrayObjetcs.length,
-    uniques: uniqueSet,
+    Uniques: uniqueSet,
   };
 };
 
+// Devuelve un objeto que proporciona información sobre cantidad total de enlaces, la cantidad de enlaces únicos y enlaces rotos en el array de objetos proporcionado
 const statsBroken = (arrayObjetcs) => {
   let uniqueSet = new Set(arrayObjetcs.map((link) => link.href)).size;
   return {
@@ -96,7 +96,6 @@ const statsBroken = (arrayObjetcs) => {
     Uniques: uniqueSet,
   };
 };
-
 
 module.exports = {
 validateFileDirectory, processMarkdownFile, getAllLinks, validate, stats, statsBroken
