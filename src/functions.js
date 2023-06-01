@@ -42,11 +42,10 @@ const validate = (mdFiles) => {
   });
 };
 
-
 // Función para leer y procesar los archivos Markdown
 const processMarkdownFile = (filePath) => {
   return new Promise((resolve, reject) => {
-    console.log(filePath);
+    //console.log(filePath);
     fs.readFile(filePath, 'utf8', (error, markdownContent) => {
       if (error) {
         console.log(error);
@@ -60,7 +59,7 @@ const processMarkdownFile = (filePath) => {
       linksA.forEach((links) => {
         const objectsElements = {
           href: links.href,
-          text: links.textContent,
+          text: links.textContent.substring(0, 50),
           file: filePath
         };
         arrayElements.push(objectsElements);
@@ -71,7 +70,6 @@ const processMarkdownFile = (filePath) => {
   });
 };
 
-
 const getAllLinks = (mdFiles) => {
   const arrayAllLinks = mdFiles.map((file) => {
     return processMarkdownFile(file);
@@ -79,12 +77,11 @@ const getAllLinks = (mdFiles) => {
   return Promise.all(arrayAllLinks);
 };
 
-
 const stats = (arrayObjetcs) => {
   let uniqueSet = new Set(arrayObjetcs.map((link) => link.href)).size;
   return {
     Total: arrayObjetcs.length,
-    uniques: uniqueSet,
+    Uniques: uniqueSet,
   };
 };
 
@@ -96,7 +93,6 @@ const statsBroken = (arrayObjetcs) => {
     Uniques: uniqueSet,
   };
 };
-
 
 module.exports = {
 validateFileDirectory, processMarkdownFile, getAllLinks, validate, stats, statsBroken
