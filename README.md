@@ -140,4 +140,4 @@ incluyendo el listado de links rotos.
 
 ## 5. Desplegado en NPM
 
-[NPM](https://github.com/SandraMTJ/MD_Links_Sandra)
+[NPM](https://www.npmjs.com/package/md-links-sandramtj)
